@@ -36,7 +36,6 @@ def parse_args():
 
 def main():
     args=parse_args()
-    print(args)
     clients=[]
     for i in range(len(args.ip_addresses)):
         clients.append(
@@ -52,7 +51,7 @@ def main():
     queries=[]
     for i in range(len(args.ip_addresses)):
         queries.append(
-            ' from(bucket:'+args.buckets[i]+')\
+            ' from(bucket: "'+args.buckets[i]+'")\
             |> range(start: -10m)\
             |> filter(fn:(r) => r._measurement == "mem")'#\
             #|> filter(fn: (r) => r.db == "dbproject")\
@@ -65,7 +64,6 @@ def main():
         sleep(1)
         results=[]
         for i in range(len(args.ip_addresses)):
-            print(query_apis[i])
             results.append(
                 query_apis[i].query(org=args.orgs[i], query=queries[i])
             )
