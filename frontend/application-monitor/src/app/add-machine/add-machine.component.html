@@ -118,14 +118,54 @@
       height: auto;
       }
       }
+
+
+      div.vspace2em {
+        clear: both;
+        height: 2em;
+      }
+
+
+.demo-table {
+  width: 100%;
+}
+
+.mat-column-demo-position {
+  width: 32px;
+  border-right: 1px solid currentColor;
+  padding-right: 24px;
+  text-align: center;
+}
+
+.mat-column-demo-name {
+  padding-left: 16px;
+  font-size: 20px;
+}
+
+.mat-column-demo-weight {
+  font-style: italic;
+}
+
+.mat-column-demo-symbol {
+  width: 32px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
     </style>
   </head>
   <body>
+
     <div class="main-block">
       <div class="left-part">
-        <i class="fas fa-futbol fa-10x" ></i>
-        <h1>Add a new machine to monitor!</h1>
-        <p>Just enter the details in the form</p>
+        <i class="fas fa-chart-line fa-10x"></i>      
+        <h1>Add a new machine to monitor</h1>
+        <p>Enter the details in the form</p>
         
       </div>
       <form [formGroup]="Form" (ngSubmit)="onSubmit()" >
@@ -136,14 +176,50 @@
         <div class="info">
           <input type="text" placeholder="Machine Name" formControlName="MachineName">
           <input type="text" name="name" placeholder="IP of the machine to connect" formControlName="MachineIP">
-          <input type="number" step="0.01" max="1.0" min="0.0" name="name" placeholder="RAM usage threshold" formControlName="RAM_usage">
-          <input type="number" step="0.01" max="1.0" min="0.0" name="name" placeholder="CPU usage threshold" formControlName="CPU_usage">
-          <input type="number" name="name" placeholder="Disk usage threshold" formControlName="Disk_usage">
-          <!-- <input type="number" name="name" min="0" step="1" placeholder="Cap on the number of threads" formControlName="n_threads"> -->
+          <input type="number" name="name" placeholder="Port" formControlName="Port">
+          <input type="number" step="0.01" max="1.0" min="0.0" name="name" placeholder="RAM usage Fraction Threshold" formControlName="RAM_usage">
+          <input type="number" step="0.01" max="1.0" min="0.0" name="name" placeholder="CPU usage Fraction Threshold" formControlName="CPU_usage">
+          <input type="number" step="0.01" max="1.0" min="0.0" name="name" placeholder="Packet Drop Fraction Threshold" formControlName="packet">
         </div>
- 
+
         <button type="submit">Add Machine</button>
       </form>
     </div>
+
+    <div class="vspace2em"></div>
+  
+    <div style = "background-color: white; color: black;">
+      <table class="center">
+         <thead>
+            <tr>
+               <th> Name </th>
+               <th> IP </th> 
+               <th> Port </th>
+               <th> CPU Usage Threshold </th>
+               <th> RAM Usage Threshold </th> 
+               <th> Packet Drop Threshold  </th>
+               <th> Delete </th>
+              </tr>
+         </thead>
+         <tbody>
+            <tr *ngFor="let number of numbers">
+             <td>{{MachineArr[number]?.MachineName}}</td>
+             <td>{{MachineArr[number]?.MachineIP}}</td>
+             <td>{{MachineArr[number]?.Port}}</td>
+             <td>{{MachineArr[number]?.RAM_usage}}</td>
+             <td>{{MachineArr[number]?.CPU_usage}}</td>
+             <td>{{MachineArr[number]?.packet}}</td>
+             <td> <button (click)="Delete(MachineArr[number]?.id)"> <i class="fas fa-trash-can"></i> Delete </button> </td>
+            </tr>
+         </tbody>
+      </table>
+    </div>
+    
+    <div class="vspace2em"></div>
+
+    <div class="center">
+      <button class="center" (click)="StartMonitoring()"> Start Monitoring </button>
+    </div>
+    
   </body>
 </html>

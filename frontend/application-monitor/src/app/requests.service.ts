@@ -9,7 +9,7 @@
 // }
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +24,10 @@ export class RequestsService {
 
   public post(url:string, body: any){
     return this.http.post(this.BASE+url, body)
+  }
+
+  public del(url:string, id: number){
+   return this.http.post(this.BASE+url, {'id' : id})
   }
 
   constructor(private http: HttpClient) { }

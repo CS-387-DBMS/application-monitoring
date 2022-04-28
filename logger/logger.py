@@ -3,24 +3,33 @@ from json import dumps
 import threading
 import psutil
 import pyshark
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--port', type=int, required=True)
+parser.add_argument('--interval', type=int, default=5)
+parser.add_argument('--cpu', type=float, default=1.0)
+parser.add_argument('--mem', type=float, default=1.0)
+parser.add_argument('--net', type=float, default=1.0)
+args = parser.parse_args()
 
 MYIP         = '127.0.0.1'
 INTERFACES   = ['lo']
-PORT         = 8000
+PORT         = args.port
 
 # if you want to monitor specific connections between machines
 # eg: CONNS = [('234.22.11.12', 800), ... ]
 CONNS        = []
 
-LOG_INTERVAL = 5
+LOG_INTERVAL = args.interval
 
 # for alerts
-CPU_THRESH_IN_PERC = 0.8 * 100
-MEM_THRESH_IN_PERC = 0.8 * 100
-PACKET_DROP_THRESH = 0.1
+CPU_THRESH_IN_PERC = args.cpu*100 # 0.8 * 100
+MEM_THRESH_IN_PERC = args.mem*100 # 0.8 * 100
+PACKET_DROP_THRESH = args.net # 0.1
 
 hostlog = open('host.log', 'wb', buffering=0)
-httplog = open('http.'+str(PORT)+'.log', 'wb', buffering=0)
+httplog = open('http.log', 'wb', buffering=0)
 
 def check_for_alert(rec):
     if(rec['total_cpu_used'] > CPU_THRESH_IN_PERC):
