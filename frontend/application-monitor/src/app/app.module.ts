@@ -7,18 +7,23 @@ import { AddMachineComponent } from './add-machine/add-machine.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { ShowStatsComponent } from './show-stats/show-stats.component';
+// import { NgApexchartsModule } from "ng-apexcharts";
+import 'chartjs-plugin-streaming';
+
 
 @NgModule({
   declarations: [
     AppComponent,
     AddMachineComponent,
-    ShowStatsComponent
+    ShowStatsComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
     HttpClientModule,
+    // ChartsModule,
+    // NgApexchartsModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
