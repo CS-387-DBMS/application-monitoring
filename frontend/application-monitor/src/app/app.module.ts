@@ -9,6 +9,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { ShowStatsComponent } from './show-stats/show-stats.component';
 // import { NgApexchartsModule } from "ng-apexcharts";
 import 'chartjs-plugin-streaming';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 
 @NgModule({
@@ -22,6 +23,7 @@ import 'chartjs-plugin-streaming';
     AppRoutingModule,
     ReactiveFormsModule,
     HttpClientModule,
+    BrowserAnimationsModule,
     // ChartsModule,
     // NgApexchartsModule,
   ],
