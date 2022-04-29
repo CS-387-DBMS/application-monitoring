@@ -86,8 +86,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'dbproject',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
+        'USER': '*****',
+        'PASSWORD': '*****',
         'HOST': os.environ['DBIP'] if 'DBIP' in os.environ else '127.0.0.1',
         'PORT': os.environ['DBPORT'] if 'DBPORT' in os.environ else 5432,
     }

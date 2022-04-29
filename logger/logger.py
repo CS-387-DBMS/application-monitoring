@@ -4,6 +4,7 @@ import threading
 import psutil
 import pyshark
 import argparse
+import traceback
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--port', type=int, required=True)
@@ -30,21 +31,27 @@ PACKET_DROP_THRESH = args.net # 0.1
 
 hostlog = open('host.log', 'wb', buffering=0)
 httplog = open('http.log', 'wb', buffering=0)
+alertlog = open('alert.log', 'wb', buffering=0)
+
+def write_csv(fd, dic, keys):
+    arr = [str(dic[k]) for k in keys]
+    line = ','.join(arr)+'\n'
+    fd.write(line.encode())
 
 def check_for_alert(rec):
     if(rec['total_cpu_used'] > CPU_THRESH_IN_PERC):
         x = {'timestamp': rec['timestamp'], 'type':'ALERT', 'alert':'CPU_USAGE', 'value':rec['total_cpu_used']}
-        hostlog.write((dumps(x)+'\n').encode())
+        write_csv(alertlog, x, ['timestamp', 'type', 'alert', 'value'])
 
     if(rec['total_mem_used'] > MEM_THRESH_IN_PERC):  
         x = {'timestamp': rec['timestamp'], 'type':'ALERT', 'alert':'RAM_USAGE', 'value':rec['total_mem_used']}
-        hostlog.write((dumps(x)+'\n').encode())
+        write_csv(alertlog, x, ['timestamp', 'type', 'alert', 'value'])
     
     if(rec['total_dropin']/rec['total_packets_recv'] > PACKET_DROP_THRESH or
        rec['total_dropout']/rec['total_packets_sent'] > PACKET_DROP_THRESH):
         val = max(rec['total_dropin']/rec['total_packets_recv'], rec['total_dropout']/rec['total_packets_sent'])
         x = {'timestamp': rec['timestamp'], 'type':'ALERT', 'alert':'PKT_DROP', 'value':val}
-        hostlog.write((dumps(x)+'\n').encode())
+        write_csv(alertlog, x, ['timestamp', 'type', 'alert', 'value'])
 
 def log_connection(ip):
     f = open('conn.'+ip[0]+'.'+str(ip[1])+'.log', 'wb', buffering=0)
@@ -86,10 +93,8 @@ def log_host():
             if(pkt.ip.dst == MYIP and pkt.tcp.dstport == str(PORT)):
                 to_myip   += int(pkt.length)
             if(pkt.highest_layer == 'HTTP'):
-                httplog.write(
-                    (dumps({'timestamp': time(), 'method': pkt.http.request_method, 'url': pkt.http.request_uri})+'\n')
-                    .encode()
-                )
+                write_csv(httplog, {'timestamp': time(), 'method': pkt.http.request_method, 'url': pkt.http.request_uri},
+                        ['timestamp', 'method', 'url'])
         try:
             capture = pyshark.LiveCapture(interface=INTERFACES, bpf_filter='tcp port '+str(PORT))
             capture.apply_on_packets(lambda x : examine(x), timeout=LOG_INTERVAL)
@@ -122,7 +127,8 @@ def log_host():
 
                 check_for_alert(record)
                 
-                hostlog.write((dumps(record)+'\n').encode())
+
+                write_csv(hostlog, record, ['timestamp', 'type', 'cpu_used', 'total_cpu_used', 'mem_used', 'total_mem_used', 'total_swap_used', 'disk_read', 'disk_write', 'total_disk_read', 'total_disk_write', 'bytes_sent', 'bytes_recv', 'total_bytes_sent', 'total_bytes_recv', 'total_packets_sent', 'total_packets_recv', 'total_dropin', 'total_dropout'])
 
                 bytes_read = vals['io_counters'].read_bytes
                 bytes_write = vals['io_counters'].write_bytes
@@ -145,6 +151,7 @@ def log_host():
                 p = psutil.Process(pid)
 
 if __name__ == "__main__":
+    log_host()
     threads = []
     threads.append(threading.Thread(target=log_host))
     for ip in CONNS:
