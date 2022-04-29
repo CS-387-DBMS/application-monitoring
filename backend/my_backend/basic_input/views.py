@@ -75,14 +75,13 @@ def deleteMachine(request):
 @csrf_exempt
 def StartMonitoring(request):
     if request.method == "GET":
-        # for idx, obj in enumerate(Machine.objects.all()):
-            # createLogger(obj)
-            # e = Event()
-            # stop_events.append(e)
-            # ip = None
+        for idx, obj in enumerate(Machine.objects.all()):
+            createLogger(obj)
 
-            # t = GetLogsThread(stop_events[idx], idx, getLogs, ip, 100000)
-            # t.start()
+            stop_events.append(Event())
+
+            t = GetLogsThread(stop_events[idx], idx, getLogs, obj, 100000)
+            t.start()
 
         return HttpResponse(status=200)
     
