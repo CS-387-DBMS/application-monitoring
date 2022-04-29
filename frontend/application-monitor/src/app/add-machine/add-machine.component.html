@@ -1,7 +1,5 @@
-<!DOCTYPE html>
-<html>
+
   <head>
-    <title>Venue Addition Form</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
     <style>
@@ -157,6 +155,15 @@
   margin-right: auto;
 }
 
+table, th {
+  border: 1px solid black;
+}
+
+td {
+    padding: 0 15px;
+    border: 1px solid black;
+  }
+
     </style>
   </head>
   <body>
@@ -189,7 +196,7 @@
     <div class="vspace2em"></div>
   
     <div style = "background-color: white; color: black;">
-      <table class="center">
+      <table class="center" style=" column-gap: 40px;">
          <thead>
             <tr>
                <th> Name </th>
@@ -203,13 +210,13 @@
          </thead>
          <tbody>
             <tr *ngFor="let number of numbers">
-             <td>{{MachineArr[number]?.MachineName}}</td>
-             <td>{{MachineArr[number]?.MachineIP}}</td>
-             <td>{{MachineArr[number]?.Port}}</td>
-             <td>{{MachineArr[number]?.RAM_usage}}</td>
-             <td>{{MachineArr[number]?.CPU_usage}}</td>
-             <td>{{MachineArr[number]?.packet}}</td>
-             <td> <button (click)="Delete(MachineArr[number]?.id)"> <i class="fas fa-trash-can"></i> Delete </button> </td>
+             <td style="text-align: center;">{{MachineArr[number]?.MachineName}}</td>
+             <td style="text-align: center;">{{MachineArr[number]?.MachineIP}}</td>
+             <td style="text-align: center;">{{MachineArr[number]?.Port}}</td>
+             <td style="text-align: center;">{{MachineArr[number]?.RAM_usage}}</td>
+             <td style="text-align: center;">{{MachineArr[number]?.CPU_usage}}</td>
+             <td style="text-align: center;">{{MachineArr[number]?.packet}}</td>
+             <td style="text-align: center; vertical-align:top;"> <button (click)="Delete(MachineArr[number]?.id)"> Delete </button> </td>
             </tr>
          </tbody>
       </table>
@@ -218,8 +225,7 @@
     <div class="vspace2em"></div>
 
     <div class="center">
-      <button class="center" (click)="StartMonitoring()"> Start Monitoring </button>
+      <button class="center" (click)="StartMonitoring()"> <h2> Start Monitoring </h2> </button>
     </div>
     
   </body>
-</html>
