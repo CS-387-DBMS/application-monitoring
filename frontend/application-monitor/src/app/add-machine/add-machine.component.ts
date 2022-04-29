@@ -23,6 +23,7 @@ export class AddMachineComponent implements OnInit {
       RAM_usage: new FormControl('', Validators.required),
       CPU_usage: new FormControl('', Validators.required),
       packet: new FormControl('', Validators.required),
+      passwrd: new FormControl('', Validators.required),
       // n_threads: new FormControl('', Validators.required),
     }
   )

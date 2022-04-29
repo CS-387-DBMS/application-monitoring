@@ -19,26 +19,28 @@ stop_events = []
 def createLogger(machine_obj):
     "Logic to ssh and create logger"
     # TODO other options : threshold etc
-    cmd =  ["ssh", "root@"+machine_obj.MachineIP, "nohup", "python3", "/root/logger.py"]
+    cmd =  ["sshpass", "-p", machine_obj.passwrd,  "root@"+machine_obj.MachineIP, "nohup", "python3", "/root/logger.py"]
     cmd += ["--port", str(machine_obj.Port)]
     cmd += ["--cpu", str(machine_obj.CPU_usage)]
     cmd += ["--mem", str(machine_obj.RAM_usage)]
     cmd += ["--net", str(machine_obj.packet)]
 
-    run(["scp", "../../../logger/logger.py", "root@"+ip+":/root/logger.py"], timeout=3)
+    run(["sshpass", "-p", machine_obj.passwrd, "scp", "../../../logger/logger.py", "root@"+ip+":/root/logger.py"], timeout=3)
     run(cmd, timeout=3)
 
-def getLogs(ip):
+def getLogs(machine_obj):
     """
     Logic to ssh and get logs: say they are stored in the variable 'logs'
     """
-    run(["scp", "root@"+ip+":/root/host.log", "/tmp/host.log"], timeout=3)
-    run(["scp", "root@"+ip+":/root/http.log", "/tmp/http.log"], timeout=3)
-    run(["scp", "root@"+ip+":/root/alert.log", "/tmp/alert.log"], timeout=3)
+    ip = machine_obj.MachineIP
+    pswd = machine_obj.passwrd
+    run(["sshpass", "-p", pswd, "scp", "root@"+ip+":/root/host.log", "/tmp/host.log"], timeout=3)
+    run(["sshpass", "-p", pswd, "scp", "root@"+ip+":/root/http.log", "/tmp/http.log"], timeout=3)
+    run(["sshpass", "-p", pswd, "scp", "root@"+ip+":/root/alert.log", "/tmp/alert.log"], timeout=3)
 
-    run(["ssh", "root@"+ip, "cp", "/dev/null", "/root/host.log"], timeout=3)
-    run(["ssh", "root@"+ip, "cp", "/dev/null", "/root/http.log"], timeout=3)
-    run(["ssh", "root@"+ip, "cp", "/dev/null", "/root/alert.log"], timeout=3)
+    run(["sshpass", "-p", pswd, "root@"+ip, "cp", "/dev/null", "/root/host.log"], timeout=3)
+    run(["sshpass", "-p", pswd, "root@"+ip, "cp", "/dev/null", "/root/http.log"], timeout=3)
+    run(["sshpass", "-p", pswd, "root@"+ip, "cp", "/dev/null", "/root/alert.log"], timeout=3)
     # pray()
 
     # read csv log files, insert into infux
