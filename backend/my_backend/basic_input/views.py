@@ -1,3 +1,4 @@
+from itertools import count
 from os import stat
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
@@ -68,16 +69,18 @@ def deleteMachine(request):
 @csrf_exempt
 def StartMonitoring(request):
     if request.method == "GET":
-        for idx, obj in enumerate(Machine.objects.all()):
+        # for idx, obj in enumerate(Machine.objects.all()):
 
-            createLogger(obj.MachineIP, obj.Port) # TODO
+            # createLogger(obj.MachineIP, obj.Port) # TODO
 
-            e = Event()
-            stop_events.append(e)
-            ip = None
+            # e = Event()
+            # stop_events.append(e)
+            # ip = None
 
-            t = GetLogsThread(stop_events[idx], idx, getLogs, ip, 100000)
-            t.start()
+            # t = GetLogsThread(stop_events[idx], idx, getLogs, ip, 100000)
+            # t.start()
 
-            pass
-        pass
+        return HttpResponse(status=200)
+    
+    else:
+        return HttpResponse(status=404)

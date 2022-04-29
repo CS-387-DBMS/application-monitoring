@@ -6,11 +6,13 @@ import { AppComponent } from './app.component';
 import { AddMachineComponent } from './add-machine/add-machine.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { ShowStatsComponent } from './show-stats/show-stats.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    AddMachineComponent
+    AddMachineComponent,
+    ShowStatsComponent
   ],
   imports: [
     BrowserModule,

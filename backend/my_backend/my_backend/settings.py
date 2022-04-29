@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'basic_input',
+    'send_data',
     'corsheaders',
 ]
 
