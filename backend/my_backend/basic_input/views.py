@@ -16,11 +16,17 @@ from json import loads
 
 stop_events = []
 
-def createLogger(ip, port):
+def createLogger(machine_obj):
     "Logic to ssh and create logger"
     # TODO other options : threshold etc
+    cmd =  ["ssh", "root@"+machine_obj.MachineIP, "nohup", "python3", "/root/logger.py"]
+    cmd += ["--port", str(machine_obj.Port)]
+    cmd += ["--cpu", str(machine_obj.CPU_usage)]
+    cmd += ["--mem", str(machine_obj.RAM_usage)]
+    cmd += ["--net", str(machine_obj.packet)]
+
     run(["scp", "../../../logger/logger.py", "root@"+ip+":/root/logger.py"], timeout=3)
-    run(["ssh", "root@"+ip, "nohup", "python3", "/root/logger.py", "--port", str(port)], timeout=3)
+    run(cmd, timeout=3)
 
 def getLogs(ip):
     """
@@ -28,16 +34,14 @@ def getLogs(ip):
     """
     run(["scp", "root@"+ip+":/root/host.log", "/tmp/host.log"], timeout=3)
     run(["scp", "root@"+ip+":/root/http.log", "/tmp/http.log"], timeout=3)
+    run(["scp", "root@"+ip+":/root/alert.log", "/tmp/alert.log"], timeout=3)
+
     run(["ssh", "root@"+ip, "cp", "/dev/null", "/root/host.log"], timeout=3)
     run(["ssh", "root@"+ip, "cp", "/dev/null", "/root/http.log"], timeout=3)
+    run(["ssh", "root@"+ip, "cp", "/dev/null", "/root/alert.log"], timeout=3)
     # pray()
 
-    f = open('/tmp/host.log', 'r')
-    logs = [loads(x) for x in f.readlines()]
-    f.close()
-    h = open('/tmp/host.log', 'r')
-    httplog = [loads(x) for x in h.readlines()]
-    h.close()
+    # read csv log files, insert into infux
     
     return logs, httplog
 
@@ -70,9 +74,7 @@ def deleteMachine(request):
 def StartMonitoring(request):
     if request.method == "GET":
         # for idx, obj in enumerate(Machine.objects.all()):
-
-            # createLogger(obj.MachineIP, obj.Port) # TODO
-
+            # createLogger(obj)
             # e = Event()
             # stop_events.append(e)
             # ip = None
