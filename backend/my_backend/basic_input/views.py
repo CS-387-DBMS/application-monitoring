@@ -57,17 +57,29 @@ def getLogs(machine_obj):
         org=os.environ["influxdb_org"]
     )
     write_api=client.write_api(write_options=SYNCHRONOUS)
+
     columns=['timestamp', 'type', 'cpu_used', 'total_cpu_used', 'mem_used', 'total_mem_used', 'total_swap_used', 'disk_read', 'disk_write', 'total_disk_read', 'total_disk_write', 'bytes_sent', 'bytes_recv', 'total_bytes_sent', 'total_bytes_recv', 'total_packets_sent', 'total_packets_recv', 'total_dropin', 'total_dropout']
     data=pd.read_csv("/tmp/host.log", names=columns)
+    for col in columns[2:]:
+        data[col]=data[col].astype("float")
     data.rename(columns={"timestamp":"_time"}, inplace=True)
     print(data)
     data = data[data['_time'].notna()]
-
     data["_time"]=data["_time"].apply(lambda x: datetime.datetime.fromtimestamp(x).astimezone())
     data=data.set_index("_time")
     data.drop(columns=['type'], inplace=True, axis=1)
     print(data)
     write_api.write(bucket=os.environ["influxdb_bucket"], record=data, data_frame_measurement_name=ip)
+
+    # columns = ['timestamp', 'type', 'alert', 'value']
+    # data=pd.read_csv("/tmp/alert.log", names=columns)
+    # data['value']=data['value'].astype("float")
+    # data.rename(columns={"timestamp":"_time"}, inplace=True)
+    # print(data)
+    # data = data[data['_time'].notna()]
+    # data["_time"]=data["_time"].apply(lambda x: datetime.datetime.fromtimestamp(x).astimezone())
+    # data=data.set_index("_time")
+    # data.drop(columns=['type'], inplace=True, axis=1)
 
     return True
 

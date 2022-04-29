@@ -101,19 +101,21 @@ def log_host():
             capture.apply_on_packets(lambda x : examine(x), timeout=LOG_INTERVAL)
         except:
             try:
-                vals = p.as_dict(['cpu_percent', 'memory_percent', 'io_counters'])
+                vals = None
+                if p:
+                    vals = p.as_dict(['cpu_percent', 'memory_percent', 'io_counters'])
                 tot_disk = psutil.disk_io_counters(nowrap=True)
                 tot_net = psutil.net_io_counters(nowrap=True)
 
                 record = { 'timestamp'       : time(),
                            'type'            : 'LOG',
-                           'cpu_used'        : vals['cpu_percent'] / psutil.cpu_count(),
+                           'cpu_used'        : vals['cpu_percent'] / psutil.cpu_count() if vals else 0,
                            'total_cpu_used'  : psutil.cpu_percent(), 
-                           'mem_used'        : vals['memory_percent'],
+                           'mem_used'        : vals['memory_percent'] if vals else 0,
                            'total_mem_used'  : psutil.virtual_memory().percent,
                            'total_swap_used' : psutil.swap_memory().percent,
-                           'disk_read'       : vals['io_counters'].read_bytes - bytes_read,
-                           'disk_write'      : vals['io_counters'].write_bytes - bytes_write,
+                           'disk_read'       : vals['io_counters'].read_bytes - bytes_read if vals else 0,
+                           'disk_write'      : vals['io_counters'].write_bytes - bytes_write if vals else 0,
                            'total_disk_read' : tot_disk.read_bytes - total_bytes_read,
                            'total_disk_write': tot_disk.write_bytes - total_bytes_write,
                            'bytes_sent'      : from_myip,
@@ -131,8 +133,8 @@ def log_host():
 
                 write_csv(hostlog, record, ['timestamp', 'type', 'cpu_used', 'total_cpu_used', 'mem_used', 'total_mem_used', 'total_swap_used', 'disk_read', 'disk_write', 'total_disk_read', 'total_disk_write', 'bytes_sent', 'bytes_recv', 'total_bytes_sent', 'total_bytes_recv', 'total_packets_sent', 'total_packets_recv', 'total_dropin', 'total_dropout'])
 
-                bytes_read = vals['io_counters'].read_bytes
-                bytes_write = vals['io_counters'].write_bytes
+                bytes_read = vals['io_counters'].read_bytes if vals else 0 
+                bytes_write = vals['io_counters'].write_bytes if vals else 0
                 total_bytes_read = tot_disk.read_bytes
                 total_bytes_write = tot_disk.write_bytes
                 total_bytes_sent = tot_net.bytes_sent
@@ -147,7 +149,7 @@ def log_host():
                     if c.laddr.port == PORT:
                         pid = c.pid
                 if not pid:
-                    print("service not running on port", PORT)
+                    p = None
                     continue
                 p = psutil.Process(pid)
 
