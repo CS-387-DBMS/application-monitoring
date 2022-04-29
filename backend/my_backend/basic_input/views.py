@@ -19,13 +19,14 @@ stop_events = []
 def createLogger(machine_obj):
     "Logic to ssh and create logger"
     # TODO other options : threshold etc
-    cmd =  ["sshpass", "-p", machine_obj.passwrd,  "root@"+machine_obj.MachineIP, "nohup", "python3", "/root/logger.py"]
+    cmd =  ["sshpass", "-p", machine_obj.passwrd, "ssh", "-o", "StrictHostKeyChecking=no", "root@"+machine_obj.MachineIP, "-f", "python3", "/root/logger.py"]
+    cmd += ["--ip", str(machine_obj.MachineIP)]
     cmd += ["--port", str(machine_obj.Port)]
     cmd += ["--cpu", str(machine_obj.CPU_usage)]
     cmd += ["--mem", str(machine_obj.RAM_usage)]
     cmd += ["--net", str(machine_obj.packet)]
 
-    run(["sshpass", "-p", machine_obj.passwrd, "scp", "../../../logger/logger.py", "root@"+ip+":/root/logger.py"], timeout=3)
+    run(["sshpass", "-p", machine_obj.passwrd, "scp", "-o", "StrictHostKeyChecking=no", "../../logger/logger.py", "root@"+machine_obj.MachineIP+":/root/logger.py"], timeout=3)
     run(cmd, timeout=3)
 
 def getLogs(machine_obj):
@@ -34,18 +35,20 @@ def getLogs(machine_obj):
     """
     ip = machine_obj.MachineIP
     pswd = machine_obj.passwrd
-    run(["sshpass", "-p", pswd, "scp", "root@"+ip+":/root/host.log", "/tmp/host.log"], timeout=3)
-    run(["sshpass", "-p", pswd, "scp", "root@"+ip+":/root/http.log", "/tmp/http.log"], timeout=3)
-    run(["sshpass", "-p", pswd, "scp", "root@"+ip+":/root/alert.log", "/tmp/alert.log"], timeout=3)
 
-    run(["sshpass", "-p", pswd, "root@"+ip, "cp", "/dev/null", "/root/host.log"], timeout=3)
-    run(["sshpass", "-p", pswd, "root@"+ip, "cp", "/dev/null", "/root/http.log"], timeout=3)
-    run(["sshpass", "-p", pswd, "root@"+ip, "cp", "/dev/null", "/root/alert.log"], timeout=3)
+    option = ["-o", "StrictHostKeyChecking=no"]
+    run(["sshpass", "-p", pswd, "scp"]+option+["root@"+ip+":/root/host.log", "/tmp/host.log"], timeout=3)
+    run(["sshpass", "-p", pswd, "scp"]+option+["root@"+ip+":/root/http.log", "/tmp/http.log"], timeout=3)
+    run(["sshpass", "-p", pswd, "scp"]+option+["root@"+ip+":/root/alert.log", "/tmp/alert.log"], timeout=3)
+
+    run(["sshpass", "-p", pswd, "ssh"]+option+["root@"+ip, "cp", "/dev/null", "/root/host.log"], timeout=3)
+    run(["sshpass", "-p", pswd, "ssh"]+option+["root@"+ip, "cp", "/dev/null", "/root/http.log"], timeout=3)
+    run(["sshpass", "-p", pswd, "ssh"]+option+["root@"+ip, "cp", "/dev/null", "/root/alert.log"], timeout=3)
     # pray()
 
     # read csv log files, insert into infux
     
-    return logs, httplog
+    return True
 
 
 @csrf_exempt
@@ -80,7 +83,7 @@ def StartMonitoring(request):
 
             stop_events.append(Event())
 
-            t = GetLogsThread(stop_events[idx], idx, getLogs, obj, 100000)
+            t = GetLogsThread(stop_events[idx], idx, getLogs, obj, 20)
             t.start()
 
         return HttpResponse(status=200)

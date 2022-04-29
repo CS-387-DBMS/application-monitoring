@@ -8,14 +8,15 @@ import traceback
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--port', type=int, required=True)
+parser.add_argument('--ip', type=str, required=True)
 parser.add_argument('--interval', type=int, default=5)
 parser.add_argument('--cpu', type=float, default=1.0)
 parser.add_argument('--mem', type=float, default=1.0)
 parser.add_argument('--net', type=float, default=1.0)
 args = parser.parse_args()
 
-MYIP         = '127.0.0.1'
-INTERFACES   = ['lo']
+MYIP         = args.ip
+INTERFACES   = ['eth0']
 PORT         = args.port
 
 # if you want to monitor specific connections between machines

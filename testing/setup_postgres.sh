@@ -1,3 +1,4 @@
+apt install tshark -y
 /usr/sbin/sshd
 unset LANG
 unset LANGUAGE
