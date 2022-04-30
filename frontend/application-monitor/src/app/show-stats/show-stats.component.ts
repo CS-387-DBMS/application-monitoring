@@ -29,18 +29,25 @@ export class ShowStatsComponent implements OnInit {
   runs1: number[] = [];
   // counter: number = 5;
 
+  public alerts_arr: any;
+
   charts  : Chart[] = [];
   data : any;
   colorlist: String[] = [];
   graphlist: String[] = [];
+  columnsToDisplay = ["alert_no","alert_time","MachineName","alert_type","alert_value"];
 
 
   constructor(private route: ActivatedRoute, private router: Router, private req: RequestsService){
 
     this.colorlist = ["red", "green", "blue", "black", "yellow", "orange"]
 
-    interval(10000).subscribe(x => {
+    interval(1000).subscribe(x => {
       this.updatee();
+    });
+
+    interval(1000).subscribe(x => {
+      this.getAlerts();
     });
 
   }
@@ -60,6 +67,16 @@ export class ShowStatsComponent implements OnInit {
         console.log(error);
       }
     )
+
+    let AlertData = this.req.get(`/data/getalertdata/`).subscribe(
+      response => {
+        this.alerts_arr = response;
+      }, 
+      error => {
+        console.log(error);
+      }
+    )
+    
   } 
 
   display_details(){
@@ -214,6 +231,32 @@ export class ShowStatsComponent implements OnInit {
 
   updatee(){
 
+   
+
+    let len = this.data.length;
+
+    let AllData = this.req.get(`/data/getdata/`).subscribe(
+      response => {
+        
+        let res : any = response;
+        for(let i=0; i<len; i++){
+          
+          let jj = this.data[i].data.length
+         
+          for(let j=0; j<jj; j++){
+            
+            let kk = this.data[i].data[j].data.length
+            for(let k=0; k<kk; k++){
+              this.data[i].data[j].data[k] = Number(res[i].data[j].data[k]);
+            }
+          }
+
+          this.charts[i].update();
+        }
+      }, 
+      error => {console.log(error)}
+    )
+
     
     // let AllData = this.req.get(`/data/getdata/`).subscribe(
     //   response => {
@@ -231,6 +274,18 @@ export class ShowStatsComponent implements OnInit {
     //     console.log(error);
     //   }
     // )
+  }
+
+  getAlerts(){
+    this.req.get(`/data/getalertdata/`).subscribe(
+      response => {
+        this.alerts_arr = response;
+        console.log(response);
+      },
+      error => {
+        console.log(error)
+      }
+    )
   }
 
 }

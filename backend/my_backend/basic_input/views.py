@@ -15,6 +15,7 @@ from json import loads
 # Create your views here.
 
 stop_events = []
+is_monitoring = False
 
 def createLogger(machine_obj):
     "Logic to ssh and create logger"
@@ -74,7 +75,8 @@ def deleteMachine(request):
 
 @csrf_exempt
 def StartMonitoring(request):
-    if request.method == "GET":
+
+    if request.method == "GET" and not is_monitoring:
         cmd = [
             "python3",
             "request_log.py",
@@ -98,8 +100,28 @@ def StartMonitoring(request):
 
         run(cmd)
 
+        is_monitoring = True
+
         return HttpResponse(status=200)
-        
+    
+    else:
+        return Response({"status": ["Monitoring has already begun."]}, status=status.HTTP_400_BAD_REQUEST)
+
+@csrf_exempt
+def StopMonitoring(request):
+
+    if request.method == "GET" and is_monitoring:
+
+        ## command to stop monitoring by stopping logger scripts
+
+        is_monitoring = False
+
+        return HttpResponse(status=200)
+    
+    else:
+        return Response({"status": ["Monitoring has not begun."]}, status=status.HTTP_400_BAD_REQUEST)        
+
+
     #     for idx, obj in enumerate(Machine.objects.all()):
     #         createLogger(obj)
 

@@ -10,7 +10,7 @@ import { ShowStatsComponent } from './show-stats/show-stats.component';
 // import { NgApexchartsModule } from "ng-apexcharts";
 import 'chartjs-plugin-streaming';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
+import { MatTableModule } from '@angular/material/table'; 
 
 @NgModule({
   declarations: [
@@ -24,6 +24,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     ReactiveFormsModule,
     HttpClientModule,
     BrowserAnimationsModule,
+    MatTableModule,
     // ChartsModule,
     // NgApexchartsModule,
   ],

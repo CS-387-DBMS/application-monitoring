@@ -1,0 +1,19 @@
+.mat-table{
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+    margin-bottom: 100px;
+}
+
+.mat-column-index_no{
+    text-align: center;
+    border-right: 1px solid;
+}
+
+.mat-column-MachineName{
+    text-align: center;
+}
+
+.mat-row{
+    background-color: rgb(255, 64, 102);
+}
