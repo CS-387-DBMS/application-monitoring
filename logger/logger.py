@@ -14,7 +14,7 @@ f.close()
 parser = argparse.ArgumentParser()
 parser.add_argument('--port', type=int, required=True)
 parser.add_argument('--ip', type=str, required=True)
-parser.add_argument('--interval', type=int, default=5)
+parser.add_argument('--interval', type=float, default=5.0)
 parser.add_argument('--cpu', type=float, default=1.0)
 parser.add_argument('--mem', type=float, default=1.0)
 parser.add_argument('--net', type=float, default=1.0)
@@ -101,62 +101,61 @@ def log_host():
             if(pkt.highest_layer == 'HTTP'):
                 write_csv(httplog, {'timestamp': time(), 'method': pkt.http.request_method, 'url': pkt.http.request_uri},
                         ['timestamp', 'method', 'url'])
+
         try:
-            capture = pyshark.LiveCapture(interface=INTERFACES, bpf_filter='tcp port '+str(PORT))
-            capture.apply_on_packets(lambda x : examine(x), timeout=LOG_INTERVAL)
+            vals = None
+            if p:
+                vals = p.as_dict(['cpu_percent', 'memory_percent', 'io_counters'])
+            tot_disk = psutil.disk_io_counters(nowrap=True)
+            tot_net = psutil.net_io_counters(nowrap=True)
+
+            record = { 'timestamp'       : time(),
+                       'type'            : 'LOG',
+                       'cpu_used'        : vals['cpu_percent'] / psutil.cpu_count() if vals else 0,
+                       'total_cpu_used'  : psutil.cpu_percent(), 
+                       'mem_used'        : vals['memory_percent'] if vals else 0,
+                       'total_mem_used'  : psutil.virtual_memory().percent,
+                       'total_swap_used' : psutil.swap_memory().percent,
+                       'disk_read'       : vals['io_counters'].read_bytes - bytes_read if vals else 0,
+                       'disk_write'      : vals['io_counters'].write_bytes - bytes_write if vals else 0,
+                       'total_disk_read' : tot_disk.read_bytes - total_bytes_read,
+                       'total_disk_write': tot_disk.write_bytes - total_bytes_write,
+                       'bytes_sent'      : 0,
+                       'bytes_recv'      : 0,
+                       'total_bytes_sent': tot_net.bytes_sent - total_bytes_sent,
+                       'total_bytes_recv': tot_net.bytes_recv - total_bytes_recv,
+                       'total_packets_sent': tot_net.packets_sent - total_packets_sent,
+                       'total_packets_recv': tot_net.packets_recv - total_packets_recv,
+                       'total_dropin'    : tot_net.dropin - total_dropin,
+                       'total_dropout'   : tot_net.dropout - total_dropout,
+                     }
+
+            check_for_alert(record)
+            
+
+            write_csv(hostlog, record, ['timestamp', 'type', 'cpu_used', 'total_cpu_used', 'mem_used', 'total_mem_used', 'total_swap_used', 'disk_read', 'disk_write', 'total_disk_read', 'total_disk_write', 'bytes_sent', 'bytes_recv', 'total_bytes_sent', 'total_bytes_recv', 'total_packets_sent', 'total_packets_recv', 'total_dropin', 'total_dropout'])
+
+            bytes_read = vals['io_counters'].read_bytes if vals else 0 
+            bytes_write = vals['io_counters'].write_bytes if vals else 0
+            total_bytes_read = tot_disk.read_bytes
+            total_bytes_write = tot_disk.write_bytes
+            total_bytes_sent = tot_net.bytes_sent
+            total_bytes_recv = tot_net.bytes_recv
+            total_packets_sent = tot_net.packets_sent
+            total_packets_recv = tot_net.packets_recv
+            total_dropin = tot_net.dropin
+            total_dropout = tot_net.dropout
         except:
-            try:
-                vals = None
-                if p:
-                    vals = p.as_dict(['cpu_percent', 'memory_percent', 'io_counters'])
-                tot_disk = psutil.disk_io_counters(nowrap=True)
-                tot_net = psutil.net_io_counters(nowrap=True)
+            pid = None
+            for c in psutil.net_connections():
+                if c.laddr.port == PORT:
+                    pid = c.pid
+            if not pid:
+                p = None
+                continue
+            p = psutil.Process(pid)
 
-                record = { 'timestamp'       : time(),
-                           'type'            : 'LOG',
-                           'cpu_used'        : vals['cpu_percent'] / psutil.cpu_count() if vals else 0,
-                           'total_cpu_used'  : psutil.cpu_percent(), 
-                           'mem_used'        : vals['memory_percent'] if vals else 0,
-                           'total_mem_used'  : psutil.virtual_memory().percent,
-                           'total_swap_used' : psutil.swap_memory().percent,
-                           'disk_read'       : vals['io_counters'].read_bytes - bytes_read if vals else 0,
-                           'disk_write'      : vals['io_counters'].write_bytes - bytes_write if vals else 0,
-                           'total_disk_read' : tot_disk.read_bytes - total_bytes_read,
-                           'total_disk_write': tot_disk.write_bytes - total_bytes_write,
-                           'bytes_sent'      : from_myip,
-                           'bytes_recv'      : to_myip,
-                           'total_bytes_sent': tot_net.bytes_sent - total_bytes_sent,
-                           'total_bytes_recv': tot_net.bytes_recv - total_bytes_recv,
-                           'total_packets_sent': tot_net.packets_sent - total_packets_sent,
-                           'total_packets_recv': tot_net.packets_recv - total_packets_recv,
-                           'total_dropin'    : tot_net.dropin - total_dropin,
-                           'total_dropout'   : tot_net.dropout - total_dropout,
-                         }
-
-                check_for_alert(record)
-                
-
-                write_csv(hostlog, record, ['timestamp', 'type', 'cpu_used', 'total_cpu_used', 'mem_used', 'total_mem_used', 'total_swap_used', 'disk_read', 'disk_write', 'total_disk_read', 'total_disk_write', 'bytes_sent', 'bytes_recv', 'total_bytes_sent', 'total_bytes_recv', 'total_packets_sent', 'total_packets_recv', 'total_dropin', 'total_dropout'])
-
-                bytes_read = vals['io_counters'].read_bytes if vals else 0 
-                bytes_write = vals['io_counters'].write_bytes if vals else 0
-                total_bytes_read = tot_disk.read_bytes
-                total_bytes_write = tot_disk.write_bytes
-                total_bytes_sent = tot_net.bytes_sent
-                total_bytes_recv = tot_net.bytes_recv
-                total_packets_sent = tot_net.packets_sent
-                total_packets_recv = tot_net.packets_recv
-                total_dropin = tot_net.dropin
-                total_dropout = tot_net.dropout
-            except:
-                pid = None
-                for c in psutil.net_connections():
-                    if c.laddr.port == PORT:
-                        pid = c.pid
-                if not pid:
-                    p = None
-                    continue
-                p = psutil.Process(pid)
+        sleep(LOG_INTERVAL)
 
 if __name__ == "__main__":
     log_host()

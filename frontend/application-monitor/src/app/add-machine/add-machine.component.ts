@@ -84,13 +84,13 @@ export class AddMachineComponent implements OnInit {
 
   StartMonitoring(){
     this.router.navigate(['stats']) 
-  //   this.req.get(`/input/monitor/`).subscribe(
-  //     response => {
-  //       this.router.navigate(['stats'])        
-  //     },
-  //     error => {
+    this.req.get(`/input/monitor/`).subscribe(
+      response => {
+        this.router.navigate(['stats'])        
+      },
+      error => {
 
-  //     }
-  //   )
+      }
+    )
   }
 }

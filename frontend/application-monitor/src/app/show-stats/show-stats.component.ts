@@ -42,11 +42,11 @@ export class ShowStatsComponent implements OnInit {
 
     this.colorlist = ["red", "green", "blue", "black", "yellow", "orange"]
 
-    interval(1000).subscribe(x => {
+    interval(2500).subscribe(x => {
       this.updatee();
     });
 
-    interval(1000).subscribe(x => {
+    interval(2500).subscribe(x => {
       this.getAlerts();
     });
 
@@ -54,7 +54,7 @@ export class ShowStatsComponent implements OnInit {
 
   ngOnInit(): void {
 
-    let AllData = this.req.get(`/data/getdata/`).subscribe(
+    let AllData = this.req.get(`/input/getdata/`).subscribe(
       response => {
         console.log("successfulll");
         this.data = response;
@@ -68,7 +68,7 @@ export class ShowStatsComponent implements OnInit {
       }
     )
 
-    let AlertData = this.req.get(`/data/getalertdata/`).subscribe(
+    let AlertData = this.req.get(`/input/getalertdata/`).subscribe(
       response => {
         this.alerts_arr = response;
       }, 
@@ -235,8 +235,10 @@ export class ShowStatsComponent implements OnInit {
 
     let len = this.data.length;
 
-    let AllData = this.req.get(`/data/getdata/`).subscribe(
+    let AllData = this.req.get(`/input/getdata/`).subscribe(
       response => {
+
+        console.log(response);
         
         let res : any = response;
         for(let i=0; i<len; i++){
@@ -258,7 +260,7 @@ export class ShowStatsComponent implements OnInit {
     )
 
     
-    // let AllData = this.req.get(`/data/getdata/`).subscribe(
+    // let AllData = this.req.get(`/input/getdata/`).subscribe(
     //   response => {
     //     let x : any = response;
     //     let len = x.length;
@@ -277,7 +279,7 @@ export class ShowStatsComponent implements OnInit {
   }
 
   getAlerts(){
-    this.req.get(`/data/getalertdata/`).subscribe(
+    this.req.get(`/input/getalertdata/`).subscribe(
       response => {
         this.alerts_arr = response;
         console.log(response);
