@@ -5,6 +5,11 @@ import psutil
 import pyshark
 import argparse
 import traceback
+import os
+
+f = open('/root/logger.pid', 'w')
+f.write(str(os.getpid()))
+f.close()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--port', type=int, required=True)
