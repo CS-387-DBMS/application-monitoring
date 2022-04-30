@@ -106,7 +106,6 @@ export class ShowStatsComponent implements OnInit {
           options: {
             scales: {
               y: {
-                  beginAtZero: true,
                   title: {
                     text: this.data[i].name,
                     display: true
@@ -274,6 +273,10 @@ export class ShowStatsComponent implements OnInit {
     //     console.log(error);
     //   }
     // )
+  }
+
+  trackByFn(index: any){
+    return (index);
   }
 
   getAlerts(){
