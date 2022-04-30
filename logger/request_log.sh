@@ -1,6 +1,11 @@
 python3 request_log.py \
-    --ip_addresses 10.42.0.151 127.0.0.1 \
-    --tokens FgWMg-pwxFwwg17d3XGYAvUg_nX7jI1uh9k0EFqeEekndEz5PZArM6-WLgmJZ2V3jTq4Fd_eFVvrcw0teSOUOA== S0Eo9ZlbLds4RyfUTsWwS1amGVXjPzdj_UZstGRePFGBTLFq_XCVvmkkvYG_Fvo62mfG2mHluqYJCmSoJnwI-w== \
-    --orgs dbproject CS387-Project \
-    --buckets apm APM \
-    --ports 8086 8086 
+    --ip_addresses 10.42.0.151 127.0.0.1 10.42.0.203\
+    --tokens FgWMg-pwxFwwg17d3XGYAvUg_nX7jI1uh9k0EFqeEekndEz5PZArM6-WLgmJZ2V3jTq4Fd_eFVvrcw0teSOUOA== S0Eo9ZlbLds4RyfUTsWwS1amGVXjPzdj_UZstGRePFGBTLFq_XCVvmkkvYG_Fvo62mfG2mHluqYJCmSoJnwI-w== WSDI7h3ZlecAhCBr13gnrej1jt0XsiKuOtvaCcPPdqIgCzpiAy7jsXTFnRVeN65hlKOTMS7jObViOuxOdsmHOg==\
+    --orgs dbproject CS387-Project db_proj\
+    --buckets apm APM apm\
+    --ports 8086 8086 8086\
+    --control_ip_address 127.0.0.1 \
+    --control_token S0Eo9ZlbLds4RyfUTsWwS1amGVXjPzdj_UZstGRePFGBTLFq_XCVvmkkvYG_Fvo62mfG2mHluqYJCmSoJnwI-w== \
+    --control_org CS387-Project \
+    --control_bucket APM-23 \
+    --control_port 8086

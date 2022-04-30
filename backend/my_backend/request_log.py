@@ -87,6 +87,7 @@ def main():
                 |> range(start: '+s+')\
                 |> filter(fn:(r) => r._measurement == "cpu" or r._measurement=="mem" or r._measurement=="diskio" or r._measurement=="net" or r._measurement=="postgresql" or r._measurement=="processes")\
                 |> filter(fn: (r) => r._field== "usage_system" or r._field== "read_bytes" or r._field== "write_bytes" or r._field== "active" or r._field=="available" or r._field== "buffered" or r._field=="cached" or r._field=="dirty" or r._field=="free" or r._field=="inactive" or r._field=="shared" or r._field=="swap_free" or r._field=="swap_total" or r._field=="used_percent" or r._field== "bytes_received" or r._field== "bytes_sent" or r._field== "tup_deleted" or r._field== "tup_fetched" or r._field== "tup_inserted" or r._field== "tup_returned" or r._field== "tup_updated" or r._field== "total_threads")'#\
+                #|> filter(fn:(r) => r._field == "tup_returned" ) '
             )
         results=[]
         for j in range(len(args.ip_addresses)):

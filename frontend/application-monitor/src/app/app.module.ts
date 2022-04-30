@@ -9,7 +9,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { ShowStatsComponent } from './show-stats/show-stats.component';
 // import { NgApexchartsModule } from "ng-apexcharts";
 import 'chartjs-plugin-streaming';
-
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatTableModule } from '@angular/material/table'; 
 
 @NgModule({
   declarations: [
@@ -22,6 +23,8 @@ import 'chartjs-plugin-streaming';
     AppRoutingModule,
     ReactiveFormsModule,
     HttpClientModule,
+    BrowserAnimationsModule,
+    MatTableModule,
     // ChartsModule,
     // NgApexchartsModule,
   ],

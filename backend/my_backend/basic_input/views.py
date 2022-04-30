@@ -19,6 +19,7 @@ import pandas as pd
 # Create your views here.
 
 stop_events = []
+is_monitoring = False
 
 def createLogger(machine_obj):
     "Logic to ssh and create logger"
@@ -110,7 +111,7 @@ def deleteMachine(request):
 
 @csrf_exempt
 def StartMonitoring(request):
-    if request.method == "GET":
+    if request.method == "GET" and not is_monitoring:
         for idx, obj in enumerate(Machine.objects.all()):
             createLogger(obj)
 
@@ -122,4 +123,31 @@ def StartMonitoring(request):
         return HttpResponse(status=200)
     
     else:
-        return HttpResponse(status=404)
+        return Response({"status": ["Monitoring has already begun."]}, status=status.HTTP_400_BAD_REQUEST)
+
+@csrf_exempt
+def StopMonitoring(request):
+
+    if request.method == "GET" and is_monitoring:
+
+        ## command to stop monitoring by stopping logger scripts
+
+        is_monitoring = False
+        return HttpResponse(status=200)
+    
+    else:
+        return Response({"status": ["Monitoring has not begun."]}, status=status.HTTP_400_BAD_REQUEST)        
+
+
+    #     for idx, obj in enumerate(Machine.objects.all()):
+    #         createLogger(obj)
+
+    #         stop_events.append(Event())
+
+    #         t = GetLogsThread(stop_events[idx], idx, getLogs, obj, 100000)
+    #         t.start()
+
+    #     return HttpResponse(status=200)
+    
+    # else:
+    #     return HttpResponse(status=404)
