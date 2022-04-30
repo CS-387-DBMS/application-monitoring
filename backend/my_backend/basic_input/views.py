@@ -114,6 +114,7 @@ def deleteMachine(request):
 
 @csrf_exempt
 def StartMonitoring(request):
+    global is_monitoring
     if request.method == "GET" and not is_monitoring:
         for idx, obj in enumerate(Machine.objects.all()):
             print('loooooooooooooop', obj.MachineIP)
@@ -123,17 +124,18 @@ def StartMonitoring(request):
 
             t = GetLogsThread(stop_events[idx], idx, getLogs, obj, 2)
             t.start()
-
+            is_monitoring = True
         return HttpResponse(status=200)
     
     else:
-        return Response({"status": ["Monitoring has already begun."]}, status=status.HTTP_400_BAD_REQUEST)
+        return HttpResponse(status=404)
 
 @csrf_exempt
 def StopMonitoring(request):
-
+    print('stoppppppppppppppppppppppp')
+    global is_monitoring
     if request.method == "GET" and is_monitoring:
-
+        print('stoppppppppppppppppppppppp')
         ## command to stop monitoring by stopping logger scripts
         for machine_obj in Machine.objects.all():
             run(["sshpass", "-p", machine_obj.passwrd, \
@@ -142,9 +144,8 @@ def StopMonitoring(request):
 
         is_monitoring = False
         return HttpResponse(status=200)
-    
     else:
-        return Response({"status": ["Monitoring has not begun."]}, status=status.HTTP_400_BAD_REQUEST)        
+        return HttpResponse(status=404)
 
 
     #     for idx, obj in enumerate(Machine.objects.all()):
@@ -238,50 +239,97 @@ def getStreamingData(request):
 
 
 def getAlertData(request):
+    org=os.environ["influxdb_org"]
+    bucket=os.environ["influxdb_bucket"]
+    client=influxdb_client.InfluxDBClient(
+        url="http://localhost:8086",
+        token=os.environ["influxdb_token"],
+        org=os.environ["influxdb_org"]
+    )
+    query_api=client.query_api()
+    MyDict = []
 
-    MyDict = [
-        {
-            "time_stamp":"", # time at which the alert occurs
-            "alert_type":"", # One of RAM, CPU or DISK
-            "machine_name":"", # From the machines on the network
-            "value":"", # Value of the attribute which exceeds the threshold
-        },
-    ]
+    for obj in Machine.objects.all():
 
-    x =         {
-            "time_stamp":3, # time at which the alert occurs
-            "alert_type":"DISK", # One of RAM, CPU or DISK
-            "machine_name":"M3", # From the machines on the network
-            "value":"1.5", # Value of the attribute which exceeds the threshold
-        }
+        query='from(bucket: "'+bucket+'")\
+                |> range(start: -10m)\
+                |> filter(fn: (r) => r["_measurement"] == "'+obj.MachineIP+'")\
+                |> filter(fn: (r) => r["_field"] == "'+"cpu_used"+'")\
+                |> aggregateWindow(every: 10s, fn: mean, createEmpty: false)\
+                |> yield(name: "'+"mean"+'")'
+        result=query_api.query(org=org, query=query)
+        
+        for table in result:
+            data=pd.DataFrame([row.values for row in table])
+            data.drop(columns=["result","table", "_start", "_stop", "_field", "_measurement"], inplace=True, axis=1)
+            data.set_index("_time", inplace=True)
+            data.rename(columns={"_value":"cpu_used"}, inplace=True)
+            data=data[-60:]
+            data=data[data["cpu_used"]>obj.CPU_usage]
+            MyDict = MyDict + [{"timestamp":data.index.tolist()[i].strftime("%m/%d/%Y, %H:%M:%S"), "alert_type":"CPU", "machine_name":obj.MachineName, "value":data["cpu_used"][i]} for i in range(len(data))]
 
-    tmp_dict = [
-        {
-            "time_stamp":"1", # time at which the alert occurs
-            "alert_type":"CPU", # One of RAM, CPU or DISK
-            "machine_name":"M1", # From the machines on the network
-            "value":"1.0", # Value of the attribute which exceeds the threshold
-        },
-        {
-            "time_stamp":"2", # time at which the alert occurs
-            "alert_type":"RAM", # One of RAM, CPU or DISK
-            "machine_name":"M2", # From the machines on the network
-            "value":"2.0", # Value of the attribute which exceeds the threshold
-        },
-        {
-            "time_stamp":3, # time at which the alert occurs
-            "alert_type":"DISK", # One of RAM, CPU or DISK
-            "machine_name":"M3", # From the machines on the network
-            "value":"1.5", # Value of the attribute which exceeds the threshold
-        },
 
-    ]
-    global counter
 
-    counter += 1
-    x["time_stamp"] = counter
-    y = x.copy()
-    tmp_dict.append(x)
+        query='from(bucket: "'+bucket+'")\
+                |> range(start: -10m)\
+                |> filter(fn: (r) => r["_measurement"] == "'+obj.MachineIP+'")\
+                |> filter(fn: (r) => r["_field"] == "'+"mem_used"+'")\
+                |> aggregateWindow(every: 10s, fn: mean, createEmpty: false)\
+                |> yield(name: "'+"mean"+'")'
+        result=query_api.query(org=org, query=query)
+        for table in result:
+            data=pd.DataFrame([row.values for row in table])
+            data.drop(columns=["result","table", "_start", "_stop", "_field", "_measurement"], inplace=True, axis=1)
+            data.set_index("_time", inplace=True)
+            data.rename(columns={"_value":"mem_used"}, inplace=True)
+            data=data[-60:]
+            data=data[data["mem_used"]>obj.RAM_usage]
+            MyDict = MyDict + ([{"timestamp":data.index.tolist()[i].strftime("%m/%d/%Y, %H:%M:%S"), "alert_type":"RAM", "machine_name":obj.MachineName, "value":data["mem_used"][i]} for i in range(len(data))])
 
-    return HttpResponse(json.dumps(tmp_dict))
+    # MyDict = [
+    #     {
+    #         "time_stamp":"", # time at which the alert occurs
+    #         "alert_type":"", # One of RAM, CPU or DISK
+    #         "machine_name":"", # From the machines on the network
+    #         "value":"", # Value of the attribute which exceeds the threshold
+    #     },
+    # ]
+
+    # x =         {
+    #         "time_stamp":3, # time at which the alert occurs
+    #         "alert_type":"DISK", # One of RAM, CPU or DISK
+    #         "machine_name":"M3", # From the machines on the network
+    #         "value":"1.5", # Value of the attribute which exceeds the threshold
+    #     }
+
+    # tmp_dict = [
+    #     {
+    #         "time_stamp":"1", # time at which the alert occurs
+    #         "alert_type":"CPU", # One of RAM, CPU or DISK
+    #         "machine_name":"M1", # From the machines on the network
+    #         "value":"1.0", # Value of the attribute which exceeds the threshold
+    #     },
+    #     {
+    #         "time_stamp":"2", # time at which the alert occurs
+    #         "alert_type":"RAM", # One of RAM, CPU or DISK
+    #         "machine_name":"M2", # From the machines on the network
+    #         "value":"2.0", # Value of the attribute which exceeds the threshold
+    #     },
+    #     {
+    #         "time_stamp":3, # time at which the alert occurs
+    #         "alert_type":"DISK", # One of RAM, CPU or DISK
+    #         "machine_name":"M3", # From the machines on the network
+    #         "value":"1.5", # Value of the attribute which exceeds the threshold
+    #     },
+
+    # ]
+    # global counter
+
+    # counter += 1
+    # x["time_stamp"] = counter
+    # y = x.copy()
+    # tmp_dict.append(x)
+    print(MyDict)
+    return HttpResponse(json.dumps(MyDict))
+
 

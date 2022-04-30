@@ -141,92 +141,7 @@ export class ShowStatsComponent implements OnInit {
       Chart_i.update()
 
       this.charts.push(Chart_i);
-    }
-
-
-    // get data for chart
-
-    let runs2: number[] = [];
-    let X_data: number[] = [];
-    let count: number = 1;
-    let radii1: number[] = [];
-    let radii2: number[] = [];
-
-    for(let i = 0; i < 10; i++){
-      this.runs1.push(Number(i));
-      X_data.push(count);
-
-      if(Number(count + i) > 5){
-        radii1.push(3);
-      }
-      else{
-        radii1.push(0);
-      }
-
-      radii1.push()
-      count = count + 1;
-    }
-
-    for(let j = 0; j < 10; j++){
-      runs2.push(Number(count + j));
-  
-      if(Number(count + j) > 5){
-        radii2.push(3);
-      }
-      else{
-        radii2.push(0);
-      }
-    }
-    //chart
-
-    this.Linechart = new Chart('linechart',{
-      type:'line',
-      data:{
-        labels: X_data,
-        datasets:[{
-          label: "test-x",
-          data:this.runs1,
-          borderColor:"red",
-          borderWidth:1,
-          tension: 0,
-          pointRadius:radii1,
-        },
-        {
-          label: "test-y",
-          data:runs2,
-          borderColor:"green",
-          borderWidth:1,
-          tension: 0,
-          pointRadius: radii2
-        }],
-      },
-      
-      options:{
-        responsive: false,
-        scales: {
-          y: {
-              beginAtZero: true,
-              title: {
-                text: "RUNS",
-                display: true
-              }
-          },
-          x: {
-            title: {
-              text: "OVERS",
-              display: true
-            }
-        },
-          
-      },
-      elements: {
-        point:{
-            radius: 0
-        }
-    }        
-      }          
-    })
-    //chart ends
+    }    
   }
 
   updatee(){
@@ -258,24 +173,6 @@ export class ShowStatsComponent implements OnInit {
       }, 
       error => {console.log(error)}
     )
-
-    
-    // let AllData = this.req.get(`/input/getdata/`).subscribe(
-    //   response => {
-    //     let x : any = response;
-    //     let len = x.length;
-    //     for(let i=0; i<len; i++){
-    //       for(let j=0; j<60; j++){
-    //         this.data[i].Machine1[j] = Number(x[i].Machine1[j]);
-    //         this.data[i].Machine2[j] = Number(x[i].Machine2[j]);
-    //       }
-    //       this.charts[i].update();
-    //     }
-    //   }, 
-    //   error => {
-    //     console.log(error);
-    //   }
-    // )
   }
 
   getAlerts(){
@@ -286,6 +183,19 @@ export class ShowStatsComponent implements OnInit {
       },
       error => {
         console.log(error)
+      }
+    )
+  }
+
+  StopMonitoring(){
+    this.req.get(`/input/stoppp/`).subscribe(
+      response => {
+        alert('Monitoring has stopped')
+        this.router.navigate([''])
+      },
+      error => {
+        console.log(error)
+        alert('Something is wrong :/');
       }
     )
   }

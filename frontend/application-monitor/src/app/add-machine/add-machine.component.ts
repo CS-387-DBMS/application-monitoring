@@ -83,13 +83,14 @@ export class AddMachineComponent implements OnInit {
   }
 
   StartMonitoring(){
-    this.router.navigate(['stats']) 
+     
     this.req.get(`/input/monitor/`).subscribe(
       response => {
         this.router.navigate(['stats'])        
       },
       error => {
-
+        alert('Probably Monitoring has already started :)')
+        this.router.navigate(['stats'])
       }
     )
   }
